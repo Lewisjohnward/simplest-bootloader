@@ -1,19 +1,26 @@
 ;
-; A simple boot sector program that loops forever
+; A simple boot sector that prints a message to the screen using a BIOS routine
 ;
 
-loop:                     ; Define a label, "loop" that will allow us
-                          ; to jump back to it forever.
+mov ah, 0x0e ; int 10/ah = 0eh -> scrolling teletype BIOS routine
+mov al, 'H'
+int 0x10
+mov al, 'e'
+int 0x10
+mov al, 'l'
+int 0x10
+mov al, 'l'
+int 0x10
+mov al, 'o'
+int 0x10
 
-  jmp loop                ; Use a simple CPU instruction that jumps to 
-                          ; a new memory address to continue execution.
-                          ; In our case, jump to the address of the current
-                          ; instruction
+jmp $       ; Jump to the current address forever
 
-times 510-($-$$) db 0     ; When compiled, our program must fit into 512 bytes,
-                          ; with the last two bytes being the magic number, so here,
-                          ; tell the assembler to pad out the program with enough zero
-                          ; bytes to bring us to the 510th byte
+;
+; Padding and magic BIOS number
+;
 
-dw 0xaa55                 ; Last two bytes (one word) form the magic number,
-                          ; so BIOS knows we are a boot sector
+times 510-($-$$) db 0 ; Pad the boot sector out with zeros
+
+dw 0xaa55             ; Add the magic number so BIOS knows
+                      ; we are a boot sector
