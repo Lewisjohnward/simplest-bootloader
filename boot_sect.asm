@@ -7,14 +7,22 @@
 
 mov ah, 0x0e ; int 10/ah = 0eh => scrolling teletype BIOS routine
 
-mov bx, the_secret
+
+mov bx, my_string
 mov al, [bx]
-int 0x10        
+printchar:
+  int 0x10        
+  mov cx, 1
+  add bx, cx
+  mov al, [bx]
+  cmp al, 0
+  jne printchar
 
-jmp $
+spin:
+  jmp $
 
-the_secret:
-  db "X"
+my_string:
+  db "Booting LewOS", 0
 
 ; Padding and magic boot sector number
 times 510-($-$$) db 0
