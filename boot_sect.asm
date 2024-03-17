@@ -1,26 +1,41 @@
 ;
-; A simple boot sector that prints a message to the screen using a BIOS routine
+; A simple boot sector program that demonstrates addressing
 ;
 
-mov ah, 0x0e ; int 10/ah = 0eh -> scrolling teletype BIOS routine
-mov al, 'H'
-int 0x10
-mov al, 'e'
-int 0x10
-mov al, 'l'
-int 0x10
-mov al, 'l'
-int 0x10
-mov al, 'o'
-int 0x10
+mov ah, 0x0e ; int 10/ah = 0eh => scrolling teletype BIOS routine
 
-jmp $       ; Jump to the current address forever
+; First attempt
+mov al, the_secret
+int 0x10            ; Does this print an X?
+                    ; No, loads the offset 
+                    ; but not the character
 
-;
-; Padding and magic BIOS number
-;
+; Second attempt
+mov al, [the_secret] ; Does this print an X?
+int 0x10             ; No, CPU treats the offset
+                     ; as though it was from
+                     ; the start of memory,
+                     ; rather than start
+                     ; address of loaded code
 
-times 510-($-$$) db 0 ; Pad the boot sector out with zeros
+; Third attempt
+mov bx, the_secret   ; Does this print an X?
+add bx, 0x7c00       ; Yes, memory location
+mov al, [bx]         ; is correct
+int 0x10        
 
-dw 0xaa55             ; Add the magic number so BIOS knows
-                      ; we are a boot sector
+; Fourth attempt
+mov al, [0x7c1e]
+int 0x10             ; Does this print an X?
+                     ; Yes, memory location
+                     ; is correct
+
+jmp $
+
+the_secret:
+  db "X"
+
+; Padding and magic boot sector number
+times 510-($-$$) db 0
+dw 0xaa55
+
