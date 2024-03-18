@@ -1,37 +1,32 @@
 ;
-; A simple boot sector program that demonstrates the stack
+; A boot sector that enters 32-bit protected mode
 ;
+[org 0x7c00] ; bootloader offset
 
-mov ah, 0x0e
+  mov bp, 0x9000 ; set the stack
+  mov sp, bp
 
-mov al, [a]          ; Prints incorrectly
-int 0x10
+  mov bx, MSG_REAL_MODE
+  call print_string ; This will be written after the BIOS messages
 
-mov bx, 0x7c0        ; Can't set ds directly
-mov ds, bx           ; so set bx then copy
-mov al, [b]          ; bx to ds
-int 0x10             ; prints b
+  call switch_to_pm
+  jmp $ ; this will actually never be executed
 
-mov al, [es:c]       ; Prints incorrectly
-int 0x10
+%include "print_string.asm"
+%include "gdt.asm"
+%include "print_string_pm.asm"
+%include "switch_to_pm.asm"
 
-mov bx, 0x7c0        ; Prints d
-mov es, bx
-mov al, [es:d]
-int 0x10
+[bits 32]
+BEGIN_PM: ; after the switch we will get here
+    mov ebx, MSG_PROT_MODE
+    call print_string_pm ; Note that this will be written at the top left corner
+    jmp $
 
-jmp $
+MSG_REAL_MODE db "Started in 16-bit real mode", 0
+MSG_PROT_MODE db "Loaded 32-bit protected mode", 0
 
-a:
-  db "a"
-b:
-  db "b"
-c:
-  db "c"
-d:
-  db "d"
-
-; Padding and magic boot sector number
+; bootsector
 times 510-($-$$) db 0
 dw 0xaa55
 
