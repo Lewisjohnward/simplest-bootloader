@@ -7,12 +7,14 @@
 
 mov ah, 0x0e ; int 10/ah = 0eh => scrolling teletype BIOS routine
 
-mov bx, BOOTING
-call print_string
+
+mov bx, 0x0
+call print_hex
 
 jmp $
 
 %include "print_string.asm"
+%include "print_hex.asm"
 
 BOOTING:
   db "Booting LewOS", 0
