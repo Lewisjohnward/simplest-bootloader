@@ -1,7 +1,8 @@
+#include "screen.h"
+#include "utils.h"
 void another_function(){
 }
 
 void main() {
-    char* video_memory = (char*) 0xb8000;
-    *video_memory = 'X';
+    screen();
 }
